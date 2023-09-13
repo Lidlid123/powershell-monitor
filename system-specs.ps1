@@ -4,7 +4,7 @@ $totalMemory = $computerInfo.TotalVisibleMemorySize / 1MB
 $freeMemory = $computerInfo.FreePhysicalMemory / 1MB
 $usedMemory = $totalMemory - $freeMemory
 $memoryUsagePercentage = [math]::Round((($usedMemory / $totalMemory) * 100), 2)
-
+$publicIP = (Invoke-RestMethod -uri "http://ipinfo.io/ip").ToString()
 # Get CPU Information
 $cpuInfo = Get-CimInstance -ClassName Win32_Processor
 $cpuUsagePercentage = [math]::Round(($cpuInfo.LoadPercentage), 2)
@@ -37,6 +37,35 @@ $htmlContent = @"
 <head>
     <title>System Information</title>
     <style>
+
+
+
+
+    /* New styles for the tables */
+    table {
+        border-collapse: collapse;
+        width: 50%;
+        margin: auto
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+    th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+    th {
+        background-color: #0000FF;
+        color: white;
+    }
+    tr:nth-child(even) { /* Stripe every other row */
+        background-color: #f2f2f2;
+    }
+
+
+
+
+
         body { font-family: Arial, sans-serif; }
         h1 { color: #333; }
         .info { margin-bottom: 20px; }
@@ -56,7 +85,8 @@ $htmlContent = @"
 </head>
 <body>
     <h1>System Information</h1>
-    <h2>Host: $hostName , Ipaddress: $ipAddress</h2>
+    <h2>Host: $hostName , Ip address: $ipAddress</h2>
+    <h2>public ip:  $publicIP</h2>
     <div class="info">
         <strong>Memory Usage:</strong> $memoryUsagePercentage%
         <div class="bar">
