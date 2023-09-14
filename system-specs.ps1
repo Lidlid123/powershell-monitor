@@ -64,6 +64,23 @@ $htmlContent = @"
 
 
 
+#new table for adding logs and events
+
+table.myTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+table.myTable th {
+    background-color: #0000FF;
+    color: white;
+}
+table.myTable th, table.myTable td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+table.myTable tr:hover {background-color: #f5f5f5;}
+
 
 
         body { font-family: Arial, sans-serif; }
@@ -119,6 +136,7 @@ foreach ($diskInfo in $diskInfos) {
 "@
 }
 
+
 # Add Top CPU Processes to HTML content
 $htmlContent += "<h2>Top 5 Processes by CPU Usage:</h2>"
 $htmlContent += "<table><tr><th>Name</th><th>CPU Usage (%)</th></tr>"
@@ -139,6 +157,31 @@ $htmlContent += @"
 </body>
 </html>
 "@
+
+# Get the most recent errors from the System log
+$systemErrors = Get-WinEvent -LogName System -MaxEvents 10 | Where-Object { $_.LevelDisplayName -eq 'Error' }
+
+# Get the most recent errors from the Application log
+$appErrors = Get-WinEvent -LogName Application -MaxEvents 10 | Where-Object { $_.LevelDisplayName -eq 'Error' }
+
+# Combine the errors and select the properties to display
+$errors = $systemErrors + $appErrors | Select-Object TimeCreated, LevelDisplayName, LogName, Message
+
+# Convert the errors to an HTML table
+$errorTable = $errors | ConvertTo-Html -Fragment
+
+# Add a class to the table
+$errorTable = $errorTable -replace '<table>', '<table class="myTable">'
+
+# Add the error table to the HTML content
+$htmlContent += "<h2>Recent System and Application Errors:</h2>"
+$htmlContent += $errorTable
+
+# Your existing code...
+
+
+
+
 
 # Write HTML content to a file
 $htmlContent | Out-File -FilePath "info.html"
